@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>유진 정훈의 저녁 정하기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #12131C;
+      --card-bg: #1E2030;
+      --primary: #FF5E62;
+      --secondary: #FF9966;
+      --accent: #FFD166;
+      --text-main: #FFFFFF;
+      --text-sub: #A5ABC0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .screen {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .screen.active {
+      display: flex !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    /* 1페이지: 메인 커버 */
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 94, 98, 0.15);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .main-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.4rem;
+      line-height: 1.3;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #FFFFFF 30%, #FFD166 70%, #FF9966 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      word-break: keep-all;
+    }
+
+    .sub-title {
+      font-size: 1.05rem;
+      color: var(--text-sub);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .food-icon-box {
+      font-size: 4.5rem;
+      margin-bottom: 36px;
+      filter: drop-shadow(0 0 25px rgba(255, 153, 102, 0.45));
+      animation: bounceHeart 2.5s infinite ease-in-out;
+    }
+
+    @keyframes bounceHeart {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.06); }
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      padding: 16px 36px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(255, 94, 98, 0.4);
+      width: 100%;
+      max-width: 320px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      touch-action: manipulation;
+    }
+
+    .btn-main:active {
+      transform: scale(0.97);
+    }
+
+    /* 룰렛 공통 스타일 */
+    .roulette-header {
+      margin-bottom: 16px;
+    }
+
+    .step-tag {
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .roulette-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.85rem;
+      color: #fff;
+    }
+
+    .roulette-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 12px 0 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 룰렛 상단 화살표 핀 */
+    .roulette-pin {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 26px solid #FF3B30;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+      z-index: 10;
+    }
+
+    .roulette-canvas {
+      width: 310px;
+      height: 310px;
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 209, 102, 0.2);
+    }
+
+    .roulette-center-btn {
+      position: absolute;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFFFFF 0%, #E0E0E0 100%);
+      border: 4px solid var(--bg-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+      color: #333;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .result-alert {
+      background: var(--card-bg);
+      border: 1.5px solid var(--accent);
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 330px;
+      margin-bottom: 20px;
+      display: none;
+      animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .result-alert h3 {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.45rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .result-alert p {
+      font-size: 0.95rem;
+      color: #eee;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 12px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 10px;
+      touch-action: manipulation;
+    }
+
+    /* 반응형 화면 축소 */
+    @media (max-width: 360px) {
+      .roulette-container {
+        width: 270px;
+        height: 270px;
+      }
+      .roulette-canvas {
+        width: 260px;
+        height: 260px;
+      }
+      .main-title {
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- 1페이지: 메인 표지 -->
+    <div class="screen active" id="screen1">
+      <div class="hero-badge">YUJIN & JEONGHUN</div>
+      <h1 class="main-title">유진 정훈의<br>저녁 정하기</h1>
+      <p class="sub-title">오늘 뭐 먹을지 고민될 땐<br>운명에 맡겨보자! 🍽️</p>
+      <div class="food-icon-box">🥘✨</div>
+      <button class="btn-main" id="btnStart">저녁 메뉴 정하러 가기</button>
+    </div>
+
+    <!-- 2페이지: 카테고리 룰렛 (한식, 일식, 양식, 중식) -->
+    <div class="screen" id="screen2">
+      <div class="roulette-header">
+        <div class="step-tag">STEP 1</div>
+        <h2 class="roulette-title">오늘의 음식 종류는?</h2>
+      </div>
+
+      <div class="roulette-container">
+        <div class="roulette-pin"></div>
+        <canvas class="roulette-canvas" id="canvasCategory" width="600" height="600"></canvas>
+        <div class="roulette-center-btn" id="btnSpinCat">돌리기!</div>
+      </div>
+
+      <div class="result-alert" id="catResultBox">
+        <p>오늘의 선택된 장르는 바로...</p>
+        <h3 id="catResultText">한식 당첨!</h3>
+      </div>
+
+      <button class="btn-main" id="btnGoMenu" style="display:none;">이 종류로 세부 메뉴 정하기 ➔</button>
+      <button class="btn-secondary" id="btnBackToCover">처음으로</button>
+    </div>
+
+    <!-- 3페이지: 세부 음식 룰렛 -->
+    <div class="screen" id="screen3">
+      <div class="roulette-header">
+        <div class="step-tag" id="selectedCatTag">STEP 2 · 한식 편</div>
+        <h2 class="roulette-title">오늘 저녁 메뉴는 과연?</h2>
+      </div>
+
+      <div class="roulette-container">
+        <div class="roulette-pin"></div>
+        <canvas class="roulette-canvas" id="canvasMenu" width="600" height="600"></canvas>
+        <div class="roulette-center-btn" id="btnSpinMenu">돌리기!</div>
+      </div>
+
+      <div class="result-alert" id="menuResultBox">
+        <p>오늘 유진 & 정훈의 저녁 식사는</p>
+        <h3 id="menuResultText">삼겹살 당첨! 🥩</h3>
+        <p style="margin-top:6px; font-size:0.85rem; color:#FFD166;">오늘 저녁 맛있게 먹자! ❤️</p>
+      </div>
+
+      <button class="btn-main" id="btnRestart" style="display:none;">다시 정하기</button>
+      <button class="btn-secondary" id="btnBackToCat">종류 다시 고르기</button>
+    </div>
+
+  </div>
+
+  <script>
+    /* 1. 사운드 효과 (Web Audio API) */
+    let audioCtx = null;
+    function getAudioCtx() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+      return audioCtx;
+    }
+
+    function playTick() {
+      try {
+        const actx = getAudioCtx();
+        if (!actx) return;
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, actx.currentTime);
+        gain.gain.setValueAtTime(0.02, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start();
+        osc.stop(actx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function playFanfare() {
+      try {
+        const actx = getAudioCtx();
+        if (!actx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, actx.currentTime);
+            gain.gain.setValueAtTime(0.06, actx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(actx.destination);
+            osc.start();
+            osc.stop(actx.currentTime + 0.5);
+          }, idx * 110);
+        });
+      } catch (e) {}
+    }
+
+    /* 2. 룰렛 데이터 정의 */
+    const categoryData = [
+      { name: "한식", color: "#FF5E62" },
+      { name: "일식", color: "#4D96FF" },
+      { name: "양식", color: "#FFD166" },
+      { name: "중식", color: "#6BCB77" }
+    ];
+
+    const menuMap = {
+      "한식": [
+        { name: "삼겹살 🥩", color: "#FF6B6B" },
+        { name: "제육볶음 🥘", color: "#FF8E72" },
+        { name: "국밥/찌개 🍲", color: "#FFAAA6" },
+        { name: "닭볶음탕 🍗", color: "#FFD3B6" },
+        { name: "칼국수 🍜", color: "#D4A5A5" },
+        { name: "분식/떡볶이 🍢", color: "#FF8B94" }
+      ],
+      "일식": [
+        { name: "초밥/스시 🍣", color: "#4D96FF" },
+        { name: "돈카츠 🍱", color: "#6BCB77" },
+        { name: "라멘 🍜", color: "#54BAB9" },
+        { name: "텐동/덮밥 🍤", color: "#748DA6" },
+        { name: "우동/소바 🥢", color: "#9CB4CC" },
+        { name: "야키토리 🍢", color: "#87A2FB" }
+      ],
+      "양식": [
+        { name: "파스타 🍝", color: "#FFD166" },
+        { name: "화덕피자 🍕", color: "#FFA45B" },
+        { name: "스테이크 🥩", color: "#F76E11" },
+        { name: "수제버거 🍔", color: "#FFBC80" },
+        { name: "리조또 🍛", color: "#FC4F4F" },
+        { name: "뇨끼/샐러드 🥗", color: "#F9D923" }
+      ],
+      "중식": [
+        { name: "짜장·짬뽕·탕수육 🥢", color: "#6BCB77" },
+        { name: "마라탕/샹궈 🌶️", color: "#EB5353" },
+        { name: "딤섬/만두 🥟", color: "#36AE7C" },
+        { name: "양꼬치 🍢", color: "#187498" },
+        { name: "꿔바로우 🥩", color: "#4E9F3D" },
+        { name: "볶음밥 🍚", color: "#85C88A" }
+      ]
+    };
+
+    let selectedCategory = "한식";
+
+    /* 3. 화면 전환 로직 */
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
+
+    /* 4. Canvas 기반 룰렛 그리기 및 회전 클래스 */
+    class Roulette {
+      constructor(canvasId, items) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.items = items;
+        this.currentAngle = 0;
+        this.isSpinning = false;
+        this.draw();
+      }
+
+      setItems(newItems) {
+        this.items = newItems;
+        this.currentAngle = 0;
+        this.draw();
+      }
+
+      draw() {
+        const ctx = this.ctx;
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        const cx = width / 2;
+        const cy = height / 2;
+        const radius = cx - 12;
+        const count = this.items.length;
+        const arc = (Math.PI * 2) / count;
+
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < count; i++) {
+          const angle = this.currentAngle + i * arc;
+          
+          // 파이 섹터 그리기
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, radius, angle, angle + arc);
+          ctx.fillStyle = this.items[i].color;
+          ctx.fill();
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "#12131C";
+          ctx.stroke();
+
+          // 텍스트 그리기
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(angle + arc / 2);
+          ctx.textAlign = "right";
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "bold 26px 'Jua', 'Noto Sans KR', sans-serif";
+          ctx.shadowColor = "rgba(0,0,0,0.6)";
+          ctx.shadowBlur = 6;
+          ctx.fillText(this.items[i].name, radius - 30, 10);
+          ctx.restore();
+        }
+
+        // 바깥 테두리 링
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.stroke();
+      }
+
+      spin(onFinished) {
+        if (this.isSpinning) return;
+        this.isSpinning = true;
+
+        const count = this.items.length;
+        const arc = (Math.PI * 2) / count;
+        
+        // 회전 각도 계산: 최소 5회전 + 무작위 추가 회전
+        const spins = 5 + Math.random() * 3;
+        const targetExtra = Math.random() * (Math.PI * 2);
+        const totalRotation = spins * (Math.PI * 2) + targetExtra;
+        
+        const duration = 3800; // 3.8초
+        const startTime = performance.now();
+        const startAngle = this.currentAngle;
+        let lastTickAngle = startAngle;
+
+        const animate = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing: easeOutCubic
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          this.currentAngle = startAngle + totalRotation * easeOut;
+
+          // 핀에 걸릴 때마다 소리 출력
+          if (this.currentAngle - lastTickAngle > arc / 2) {
+            playTick();
+            lastTickAngle = this.currentAngle;
+          }
+
+          this.draw();
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            this.isSpinning = false;
+            
+            // 12시 방향(Top: -PI/2 또는 3*PI/2)에 위치한 아이템 계산
+            const normalizedAngle = (Math.PI * 2) - (this.currentAngle % (Math.PI * 2));
+            const pointerAngle = (normalizedAngle + (3 * Math.PI / 2)) % (Math.PI * 2);
+            const winningIndex = Math.floor(pointerAngle / arc) % count;
+            
+            playFanfare();
+            if (onFinished) onFinished(this.items[winningIndex]);
+          }
+        };
+
+        requestAnimationFrame(animate);
+      }
+    }
+
+    /* 5. 앱 초기화 및 이벤트 연결 */
+    let catRoulette = null;
+    let menuRoulette = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      catRoulette = new Roulette('canvasCategory', categoryData);
+
+      // 1페이지 -> 2페이지
+      document.getElementById('btnStart').addEventListener('click', () => {
+        showScreen('screen2');
+        catRoulette.draw();
+      });
+
+      // 2페이지 카테고리 룰렛 돌리기
+      document.getElementById('btnSpinCat').addEventListener('click', () => {
+        const resultBox = document.getElementById('catResultBox');
+        const nextBtn = document.getElementById('btnGoMenu');
+        resultBox.style.display = 'none';
+        nextBtn.style.display = 'none';
+
+        catRoulette.spin((winner) => {
+          selectedCategory = winner.name;
+          document.getElementById('catResultText').innerText = `${selectedCategory} 당첨! 🎉`;
+          resultBox.style.display = 'block';
+          nextBtn.style.display = 'block';
+        });
+      });
+
+      // 2페이지 -> 3페이지 이동
+      document.getElementById('btnGoMenu').addEventListener('click', () => {
+        showScreen('screen3');
+        document.getElementById('selectedCatTag').innerText = `STEP 2 · ${selectedCategory} 편`;
+        document.getElementById('menuResultBox').style.display = 'none';
+        document.getElementById('btnRestart').style.display = 'none';
+
+        const menus = menuMap[selectedCategory] || menuMap["한식"];
+        if (!menuRoulette) {
+          menuRoulette = new Roulette('canvasMenu', menus);
+        } else {
+          menuRoulette.setItems(menus);
+        }
+      });
+
+      // 3페이지 세부 음식 룰렛 돌리기
+      document.getElementById('btnSpinMenu').addEventListener('click', () => {
+        const resultBox = document.getElementById('menuResultBox');
+        const restartBtn = document.getElementById('btnRestart');
+        resultBox.style.display = 'none';
+        restartBtn.style.display = 'none';
+
+        menuRoulette.spin((winner) => {
+          document.getElementById('menuResultText').innerText = `${winner.name} 당첨! 😋`;
+          resultBox.style.display = 'block';
+          restartBtn.style.display = 'block';
+        });
+      });
+
+      // 네비게이션 버튼들
+      document.getElementById('btnBackToCover').addEventListener('click', () => showScreen('screen1'));
+      document.getElementById('btnBackToCat').addEventListener('click', () => showScreen('screen2'));
+      document.getElementById('btnRestart').addEventListener('click', () => {
+        document.getElementById('menuResultBox').style.display = 'none';
+        document.getElementById('btnRestart').style.display = 'none';
+        showScreen('screen1');
+      });
+    });
+  </script>
+</body>
+</html>
